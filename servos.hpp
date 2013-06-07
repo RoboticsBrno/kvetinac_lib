@@ -75,19 +75,29 @@ class servo_t
 		return m_value[translate_index(index)];
 	}
 	
-	servo_t(index_type index)
-	:m_index(translate_index(index))
+	servo_t(index_type index, precision_value_type servo_min_value = min_value_c, precision_value_type servo_max_value = max_value_c)
+		:m_index(translate_index(index)), m_servo_min_value(servo_min_value), m_servo_max_value(servo_max_value)
 	{
 	}
 	
 	void set(precision_value_type value)
 	{
-		_set(m_index, clamp(value, min_value_c, max_value_c));
+		_set(m_index, clamp(value, m_servo_min_value, m_servo_max_value));
 	}
 	
 	precision_value_type get()
 	{
 		return m_value[m_index];
+	}
+	
+	void set_min(precision_value_type value)
+	{
+		m_servo_min_value = value;			
+	}
+	
+	void set_max(precision_value_type value)
+	{
+		m_servo_max_value = value;
 	}
 	
 	static const precision_value_type timer_period_c = 40000;	//2.5ms
@@ -113,6 +123,9 @@ class servo_t
 }
 
 const index_type m_index;
+
+precision_value_type m_servo_min_value;
+precision_value_type m_servo_max_value;
 
 static index_type m_current;
 static volatile precision_value_type m_value[number_of_servos_c];
