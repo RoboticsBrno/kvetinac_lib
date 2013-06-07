@@ -20,7 +20,7 @@ static const uint16_t c_sw_reset_data                    = 0;
 class encoder_t
 {
 public:
-    encoder_t(uint8_t cs_pin)
+    encoder_t(uint8_t cs_pin, bool invert = false)
     {
         m_value = 0;
         m_value_last = 0;
@@ -33,6 +33,7 @@ public:
         m_agc = 0;
         m_cs_pin = cs_pin;
         m_clr_err_req = false;
+		m_invert = invert;
     }
 
     void clear()
@@ -106,13 +107,31 @@ public:
     int16_t accel() const { return m_accel; }
     uint8_t agc() const { return m_agc; }
     uint8_t state() const { return m_state; }
+	
+	enum read_t { READ_VALUE, READ_SPEED, READ_DISTANCE, READ_ACCEL, READ_AGC, READ_STATE };
+	int32_t read(read_t what = READ_VALUE)
+	{
+		switch(what)
+		{
+			case READ_VALUE: return value();
+			case READ_SPEED: return speed();
+			case READ_DISTANCE: return distance();
+			case READ_ACCEL: return accel();
+			case READ_AGC: return agc();
+			case READ_STATE: return state();
+			default: return -1;
+		}
+	}
 
 private:
     inline void setValue(int16_t& r)
     {
         m_state = r & 0x02;
         r >>= 2;
-        m_value = r & 0x0FFF;          //0b00111111111111
+		if(m_invert)
+			m_value = ~r & 0x0FFF;          //0b00111111111111
+		else
+			m_value = r & 0x0FFF;          //0b00111111111111
         m_state |= (r & 0x3000) >> 10; //0b11000000000000
     }
 
@@ -134,12 +153,13 @@ private:
     volatile int16_t m_accel;
     volatile bool m_clr_err_req;
     uint8_t m_cs_pin;
+	bool m_invert;
 };
 
 typedef pin<portg, 0> enl_cs;
 typedef pin<portg, 1> enr_cs;
 encoder_t enc_left(0);
-encoder_t enc_right(1);
+encoder_t enc_right(1, true);
 
 class encoders_comm_t
 {

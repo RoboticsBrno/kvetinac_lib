@@ -55,11 +55,8 @@ typedef pin<porte, 1> pin_usart0_tx;
 #define UART0_TX_BUFF 128
 #endif
 
-static async_usart<usart0, UART0_RX_BUFF, UART0_TX_BUFF, kvetinac_bootseq> debug(115200UL, true);
-
-#ifndef USART0_RX_vect
-#define USART0_RX_vect USART0__RX_vect
-#endif
+typedef async_usart<usart0, UART0_RX_BUFF, UART0_TX_BUFF, kvetinac_bootseq> debug_t;
+debug_t debug(115200UL, true);
 
 ISR(USART0_RX_vect)
 {
@@ -69,7 +66,21 @@ ISR(USART0_RX_vect)
 typedef pin<portd, 2> pin_usart1_rx;
 typedef pin<portd, 3> pin_usart1_tx;
 
-static sync_usart<usart1> data(2000000UL);
+#ifndef UART1_RX_BUFF
+#define UART1_RX_BUFF 128
+#endif
+
+#ifndef UART1_TX_BUFF
+#define UART1_TX_BUFF 128
+#endif
+
+typedef async_usart<usart1, UART1_RX_BUFF, UART1_TX_BUFF, avrlib::nobootseq> com_t;
+com_t com(115200UL, true);
+
+ISR(USART1_RX_vect)
+{
+	com.process_rx();
+}
 
 typedef pin<porte, 4> pin_stop_btn;
 
@@ -84,32 +95,6 @@ typedef pin<porte, 4> pin_stop_btn;
 #include "encoders.hpp"
 #endif
 
-void kvetinac_bootseq_reset()
-{
-    cli();
-    encoders_comm.stop();
-
-#if defined(WDTCR)
-# if defined(WDCE)
-    WDTCR = (1<<WDCE)|(1<<WDE);
-# else
-    WDTCR = (1<<WDTOE)|(1<<WDE);
-# endif
-    WDTCR = (1<<WDE);
-#elif defined(WDTCSR)
-    WDTCSR = (1<<WDCE)|(1<<WDE);
-    WDTCSR = (1<<WDE);
-#elif __AVR_ARCH__ >= 100 /*xmega*/
-    CCP = CCP_IOREG_gc;
-    RST.CTRL = RST_SWRST_bm;
-#else
-# error Unsupported Watchdog timer interface.
-#endif
-    for (;;)
-    {
-    }
-}
-
 void run(void);
 
 void init()
@@ -123,16 +108,41 @@ void init()
 	#ifdef KVETINAC_MOTORS_HPP
 		motors_init();
 	#endif
-    #ifdef KVETINAC_ENCODERS_HPP
-        encoders_init();
-    #endif
+	#ifdef KVETINAC_ENCODERS_HPP
+		encoders_init();
+	#endif
+}
+
+void kvetinac_bootseq_reset()
+{
+	cli();
+	encoders_comm.stop();
+
+	#if defined(WDTCR)
+	# if defined(WDCE)
+	WDTCR = (1<<WDCE)|(1<<WDE);
+	# else
+	WDTCR = (1<<WDTOE)|(1<<WDE);
+	# endif
+	WDTCR = (1<<WDE);
+	#elif defined(WDTCSR)
+	WDTCSR = (1<<WDCE)|(1<<WDE);
+	WDTCSR = (1<<WDE);
+	#elif __AVR_ARCH__ >= 100 /*xmega*/
+	CCP = CCP_IOREG_gc;
+	RST.CTRL = RST_SWRST_bm;
+	#else
+	# error Unsupported Watchdog timer interface.
+	#endif
+	for (;;)
+	{
+	}
 }
 
 int main(void)
 {
 	pin_usart0_rx::set_high(); //pull-up
 	pin_usart1_rx::set_high(); //pull-up
-	pin_stop_btn::set_high();//pull-up
 	init();
 	sei();
 	//wait(msec(10));

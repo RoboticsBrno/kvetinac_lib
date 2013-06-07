@@ -9,7 +9,7 @@
 #define KVETINAC_MOTORS_INVERT_LEFT false
 #endif
 #ifndef KVETINAC_MOTORS_INVERT_RIGHT
-#define KVETINAC_MOTORS_INVERT_RIGHT true
+#define KVETINAC_MOTORS_INVERT_RIGHT false
 #endif
 
 #include "avrlib/portb.hpp"
@@ -86,7 +86,7 @@ struct motor_t
 typedef pin<porte, 6> pin_motor_in_la;
 typedef pin<porte, 2> pin_motor_in_lb;
 typedef pin<porte, 3> pin_motor_diag_la;
-typedef pin<portf, 0> pin_motor_diag_lb;
+typedef pin<portf, 1> pin_motor_diag_lb;
 typedef pin<portb, 5> pin_motor_pwm_l; // OC1A
 
 typedef pin<portg, 4> pin_motor_in_ra;

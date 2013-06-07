@@ -15,7 +15,7 @@
 
 using avrlib::timer3;
 
-typedef avrlib::counter<timer3, KVETINAC_BASE_TIMER_VALUE_TYPE, false> base_timer_type;
+typedef avrlib::counter<timer3, KVETINAC_BASE_TIMER_VALUE_TYPE, uint32_t, false> base_timer_type;
 base_timer_type base_timer(avrlib::timer_fosc_1);
 
 struct stopwatch

@@ -4,7 +4,7 @@
 //#include "../avrlib/adc.hpp"
 #include "filter.hpp"
 
-#define CS_L 1
+#define CS_L 0
 #define CS_R 2
 #define BAT  3
 #define ADC4 4
@@ -145,11 +145,14 @@ analog_t* analog_t::s_slot[KVETINAC_ANALOG_SLOTS] = {0};
 analog_t::index_type analog_t::s_index = 0;
 analog_t::index_type analog_t::s_active = 0;
 
-weighted_moving_average<analog_t::filter_value_type, analog_t::filter_internal_type> battery_voltage_filter(16, 1, 16, 10);
+//weighted_moving_average<analog_t::filter_value_type, analog_t::filter_internal_type> battery_voltage_filter(16, 1, 16, 10);
+no_filter<analog_t::value_type> battery_voltage_filter;
 analog_t battery_voltage(BAT, battery_voltage_filter);
-weighted_moving_average<analog_t::filter_value_type, analog_t::filter_internal_type> left_motor_current_filter(16, 1, 16, 10);
+//weighted_moving_average<analog_t::filter_value_type, analog_t::filter_internal_type> left_motor_current_filter(16, 1, 16, 10);
+no_filter<analog_t::value_type> left_motor_current_filter;
 analog_t left_motor_current(CS_L, left_motor_current_filter);
-weighted_moving_average<analog_t::filter_value_type, analog_t::filter_internal_type> right_motor_current_filter(16, 1, 16, 10);
+//weighted_moving_average<analog_t::filter_value_type, analog_t::filter_internal_type> right_motor_current_filter(16, 1, 16, 10);
+no_filter<analog_t::value_type> right_motor_current_filter;
 analog_t right_motor_current(CS_R, right_motor_current_filter);
 
 typedef analog_t analog;
