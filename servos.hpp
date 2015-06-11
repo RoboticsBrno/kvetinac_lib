@@ -111,9 +111,12 @@ class servo_t
 
 	static void _set(index_type index, precision_value_type value)
 	{
-		cli();
-		m_value[index] = value;
-		sei();
+		if(value != m_value[index])
+		{
+			cli();
+			m_value[index] = value;
+			sei();
+		}
 	}
 	
 	static index_type translate_index(index_type index)
