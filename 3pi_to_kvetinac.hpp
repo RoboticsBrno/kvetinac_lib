@@ -217,7 +217,7 @@ private:
 	usart_type m_usart;
 };
 
-typedef rs232_template<usart0, UART0_RX_BUFF, UART0_TX_BUFF, kvetinac_bootseq, uint32_t> rs232_t;
+typedef rs232_template<usart0, UART0_RX_BUFF, UART0_TX_BUFF, avrlib::nobootseq, uint32_t> rs232_t;
 rs232_t rs232(115200UL, true);
 
 ISR(USART0_RX_vect)
@@ -236,7 +236,7 @@ typedef pin<portd, 3> pin_usart1_tx;
 #define UART1_TX_BUFF 128
 #endif
 
-typedef async_usart<usart1, UART1_RX_BUFF, UART1_TX_BUFF, avrlib::nobootseq> com_t;
+typedef async_usart<usart1, UART1_RX_BUFF, UART1_TX_BUFF, kvetinac_bootseq> com_t;
 com_t com(115200UL, true);
 
 ISR(USART1_RX_vect)
