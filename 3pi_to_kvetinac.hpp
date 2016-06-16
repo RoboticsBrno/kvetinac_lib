@@ -1,5 +1,5 @@
-#ifndef KVETINAC_HPP
-#define KVETINAC_HPP
+#ifndef THREE_PI_TO_KVETINAC_HPP
+#define THREE_PI_TO_KVETINAC_HPP
 
 #ifndef F_CPU
 #define F_CPU 16000000UL
@@ -47,6 +47,16 @@ using avrlib::async_usart;
 using avrlib::sync_usart;
 
 using avrlib::clamp;
+
+#if !defined(KVETINAC_NEW_V1) && !defined(KVETINAC_NEW_V3)
+# error You must define version of hardware (KVETINAC_NEW_V1 or KVETINAC_NEW_V3)!
+#endif
+/*
+You must define version of hardware:
+#define KVETINAC_NEW_V1
+or
+#define KVETINAC_NEW_V3
+*/
 
 #ifndef KVETINAC_INCLUDED
 #include "servos.hpp"
@@ -105,9 +115,6 @@ typedef pin<porte, 1> pin_usart0_tx;
 #define UART0_TX_BUFF 128
 #endif
 
-//typedef async_usart<usart0, UART0_RX_BUFF, UART0_TX_BUFF, kvetinac_bootseq> rs232_t;
-//rs232_t rs232(115200UL, true);
-
 template <typename Usart, int RxBufferSize, int TxBufferSize, typename Bootseq, typename Overflow>
 class rs232_template : public async_usart <Usart, RxBufferSize, TxBufferSize, Bootseq, Overflow>
 {
@@ -154,42 +161,42 @@ class rs232_template : public async_usart <Usart, RxBufferSize, TxBufferSize, Bo
 		avrlib::send(*this, str);
 	}
 
-// 	void sendHexByte(uint8_t byte)
-// 	{
-// 		static const char hexdigits[] = "0123456789ABCDEF";
-// 		this->sendCharacter(hexdigits[byte >> 4]);
-// 		this->sendCharacter(hexdigits[byte & 0x0f]);
-// 	}
-// 
-// 	template <typename T>
-// 	void sendNumberHex(T n, uint8_t width = 0)
-// 	{
-// 		char buf[32];
-// 		uint8_t len = 0;
-// 
-// 		if (n != 0)
-// 		{
-// 			T a = abs(n);
-// 
-// 			while (a > 0)
-// 			{
-// 				buf[len++] = '0' + (a & 0x0f);
-// 				a = a >> 4;
-// 			}
-// 
-// 			if (n < 0)
-// 			buf[len++] = '-';
-// 		}
-// 		else
-// 		buf[len++] = '0';
-// 
-// 		for (; width > len; --width)
-// 		m_txbuf.push(' ');
-// 		for (; len > 0; --len)
-// 		m_txbuf.push(buf[len-1]);
-// 		UCSR0B |= (1<<UDRIE0);
-// 	}
-// 
+ 	void sendHexByte(uint8_t byte)
+ 	{
+ 		static const char hexdigits[] = "0123456789ABCDEF";
+ 		this->sendCharacter(hexdigits[byte >> 4]);
+ 		this->sendCharacter(hexdigits[byte & 0x0f]);
+ 	}
+ 
+ 	template <typename T>
+ 	void sendNumberHex(T n, uint8_t width = 0)
+ 	{
+ 		char buf[32];
+ 		uint8_t len = 0;
+ 
+ 		if (n != 0)
+ 		{
+ 			T a = abs(n);
+ 
+ 			while (a > 0)
+ 			{
+ 				buf[len++] = '0' + (a & 0x0f);
+ 				a = a >> 4;
+ 			}
+ 
+ 			if (n < 0)
+ 			buf[len++] = '-';
+ 		}
+ 		else
+ 		buf[len++] = '0';
+ 
+ 		for (; width > len; --width)
+ 		this->write(' ');
+ 		for (; len > 0; --len)
+ 		this->write(buf[len-1]);
+ 		UCSR0B |= (1<<UDRIE0);
+ 	}
+ 
 	template <typename T>
 	void sendNumber(T n, uint8_t width = 0)
 	{
@@ -246,17 +253,35 @@ ISR(USART1_RX_vect)
 
 typedef pin<porte, 4> pin_stop_btn;
 
+#define BUTTON_A        (1 << PORTA0)
+#define BUTTON_B        (1 << PORTA1)
+#define BUTTON_C        (1 << PORTA2)
+#define BUTTON_D        (1 << PORTA3)
+#define BUTTON_E        (1 << PORTA4)
+#define BUTTON_F        (1 << PORTA5)
+#define BUTTON_G        (1 << PORTA6)
+#define BUTTON_H        (1 << PORTA7)
+#define ALL_BUTTONS     (BUTTON_A | BUTTON_B | BUTTON_C | BUTTON_D | BUTTON_E | BUTTON_F | BUTTON_G | BUTTON_H)
+#define ANY_BUTTONS      ALL_BUTTONS
+
+void init_buttons()
+{
+    DDRA &= ~ALL_BUTTONS;
+    PORTA |= ALL_BUTTONS;
+}
+
+void clean_buttons()
+{
+    PORTA &= ~ALL_BUTTONS;
+}
 
 inline bool isPressed(uint8_t buttons)
 {
-	buttons = 1 << buttons;
-	PORTA |= buttons;
 	return !(PINA & buttons);
 }
 
 inline uint8_t waitForPress(uint8_t buttons)
 {
-	buttons = 1 << buttons;
 	while(PINA & buttons)
 	{
 		delay(5);
@@ -266,7 +291,6 @@ inline uint8_t waitForPress(uint8_t buttons)
 
 inline uint8_t waitForRelease(uint8_t buttons)
 {
-	buttons = 1 << buttons;
 	while(!(PINA & buttons))
 	{
 		delay(5);
@@ -297,13 +321,15 @@ inline void waitForButton(uint8_t buttons)
 	} while(isPressed(buttons));
 }
 
+const uint16_t MAX_SPEED = (KVETINAC_MOTORS_PWM_RESOLUTION / 2) - 1;
+
 /**
  * Nastavi vykon leveho motoru
  * @param speed vykon od -255 do +255
  */
 void setLeftMotor(int16_t speed)
-{
-	speed = (clamp(speed, -250, 250) << 1);
+{                       
+	speed = (clamp(speed, -MAX_SPEED , MAX_SPEED) << 1);
 	
 	left_motor::power(speed);
 }
@@ -314,7 +340,7 @@ void setLeftMotor(int16_t speed)
  */
 void setRightMotor(int16_t speed)
 {
-	speed = (clamp(speed, -250, 250) << 1);
+	speed = (clamp(speed, -MAX_SPEED, MAX_SPEED) << 1);
 	
 	right_motor::power(speed);
 }
@@ -339,11 +365,8 @@ void setMotorPowerID(uint8_t motor_id, int16_t speed)
  */
 void setMotorPower(int16_t left, int16_t right)
 {
-	left = left << 1;//clamp(left, -250, 250) << 1;
-	right = right << 1; //clamp(right, -250, 250) << 1;
-	
-	left_motor::power(left);
-	right_motor::power(right);
+	setLeftMotor(left);
+	setRightMotor(right);
 }
 
 
@@ -351,6 +374,7 @@ void run(void);
 
 void init()
 {
+	init_buttons();
 	time.restart();
 	
 	#ifdef KVETINAC_SERVOS_HPP

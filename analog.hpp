@@ -4,14 +4,27 @@
 //#include "../avrlib/adc.hpp"
 #include "filter.hpp"
 
-#define CS_L 0
-#define CS_R 2
-#define BAT  3
-#define ADC4 4
-#define ADC5 5
-#define ADC6 6
-#define ADC7 7
-#define TEST_1V23 31
+#ifdef KVETINAC_NEW_V1
+    #define CS_L 0
+    #define CS_R 2
+    #define BAT  3
+    #define ADC4 4
+    #define ADC5 5
+    #define ADC6 6
+    #define ADC7 7
+    #define TEST_1V23 31
+#endif
+
+#ifdef KVETINAC_NEW_V3
+    #define CS_L 1
+    #define CS_R 2
+    #define BAT  3
+    #define ADC4 4
+    #define ADC5 5
+    #define ADC6 6
+    #define ADC7 7
+    #define TEST_1V23 31
+#endif
 
 #define REF_AVCC (0<<REFS1) //default
 #define REF_2V56 (1<<REFS1)
