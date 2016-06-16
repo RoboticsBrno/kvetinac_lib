@@ -83,17 +83,34 @@ struct motor_t
 	
 };
 
-typedef pin<porte, 6> pin_motor_in_la;
-typedef pin<porte, 2> pin_motor_in_lb;
-typedef pin<porte, 3> pin_motor_diag_la;
-typedef pin<portf, 1> pin_motor_diag_lb;
-typedef pin<portb, 5> pin_motor_pwm_l; // OC1A
 
-typedef pin<portg, 4> pin_motor_in_ra;
-typedef pin<porte, 7> pin_motor_in_rb;
-typedef pin<portg, 3> pin_motor_diag_ra;
-typedef pin<portb, 4> pin_motor_diag_rb;
-typedef pin<portb, 6> pin_motor_pwm_r; // OC1B
+#ifdef KVETINAC_NEW_V1
+	typedef pin<porte, 6> pin_motor_in_la;
+	typedef pin<porte, 2> pin_motor_in_lb;
+	typedef pin<porte, 3> pin_motor_diag_la;
+	typedef pin<portf, 1> pin_motor_diag_lb;
+	typedef pin<portb, 5> pin_motor_pwm_l; // OC1A
+
+	typedef pin<portg, 4> pin_motor_in_ra;
+	typedef pin<porte, 7> pin_motor_in_rb;
+	typedef pin<portg, 3> pin_motor_diag_ra;
+	typedef pin<portb, 4> pin_motor_diag_rb;
+	typedef pin<portb, 6> pin_motor_pwm_r; // OC1B
+#endif
+	
+#ifdef KVETINAC_NEW_V3
+	typedef pin<porte, 6> pin_motor_in_la;
+	typedef pin<porte, 2> pin_motor_in_lb;
+	typedef pin<porte, 3> pin_motor_diag_la;
+	typedef pin<portf, 0> pin_motor_diag_lb;
+	typedef pin<portb, 5> pin_motor_pwm_l; // OC1A
+
+	typedef pin<portg, 4> pin_motor_in_ra;
+	typedef pin<porte, 7> pin_motor_in_rb;
+	typedef pin<portg, 3> pin_motor_diag_ra;
+	typedef pin<portb, 4> pin_motor_diag_rb;
+	typedef pin<portb, 6> pin_motor_pwm_r; // OC1B
+#endif
 
 typedef motor_t<pin_motor_in_la, pin_motor_in_lb, pin_motor_diag_la, pin_motor_diag_lb, timer1::ocra, KVETINAC_MOTORS_INVERT_LEFT> left_motor_type;
 typedef motor_t<pin_motor_in_ra, pin_motor_in_rb, pin_motor_diag_ra, pin_motor_diag_rb, timer1::ocrb, KVETINAC_MOTORS_INVERT_RIGHT> right_motor_type;
