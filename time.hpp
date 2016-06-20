@@ -16,7 +16,7 @@
 using avrlib::timer3;
 
 typedef avrlib::counter<timer3, KVETINAC_BASE_TIMER_VALUE_TYPE, uint32_t, false> base_timer_type;
-base_timer_type base_timer(avrlib::timer_fosc_1);
+base_timer_type base_timer;
 
 struct stopwatch
 	:avrlib::stopwatch<base_timer_type>
@@ -57,9 +57,9 @@ void wait(base_timer_type::time_type time, Process process, int)
 	avrlib::wait(base_timer, time, process, 0);
 }
 
-#define  sec(value) (16000000UL*value)
-#define msec(value) (16000UL*value)
-#define usec(value) (16UL*value)
+#define  sec(value) (2000000UL*value)
+#define msec(value) (2000UL*value)
+#define usec(value) (2UL*value)
 
 
 #endif
