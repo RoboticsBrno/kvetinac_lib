@@ -10,7 +10,7 @@ ISR(TIMER3_OVF_vect)
 		base_timer.tov_interrupt();
 	#endif
 	#ifdef KVETINAC_SERVOS_HPP
-		servo_t::process_ovf();
+		//servo_t::process_ovf();
 	#endif
 }
 
