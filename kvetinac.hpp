@@ -44,6 +44,16 @@ using avrlib::usart1;
 using avrlib::async_usart;
 using avrlib::sync_usart;
 
+#if !defined(KVETINAC_NEW_V1) && !defined(KVETINAC_NEW_V3)
+# error You must define version of hardware (KVETINAC_NEW_V1 or KVETINAC_NEW_V3)!
+#endif
+/*
+You must define version of hardware:
+#define KVETINAC_NEW_V1
+or
+#define KVETINAC_NEW_V3
+*/
+
 typedef pin<porte, 0> pin_usart0_rx;
 typedef pin<porte, 1> pin_usart0_tx;
 
